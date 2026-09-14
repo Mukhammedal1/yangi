@@ -3,7 +3,8 @@
   "functions": {
     "api/index.js": {
       "maxDuration": 60,
-      "includeFiles": "{public,fonts}/**"
+      "memory": 3008,
+      "includeFiles": "public/**"
     }
   }
 }
