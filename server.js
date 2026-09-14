@@ -197,7 +197,7 @@ async function pdfYasash(mahsulotlar, stream, sozlama = {}) {
   const blokH = barKor ? (barHMM + BAR_ORALIQ + RAQAM_H + PAST_CHET) * MM : 0;
   const matnH = Math.max(0, H - 2 * chet - blokH);
 
-  const doc = new PDFDocument({ size: [W, H], margin: 0 });
+  const doc = new PDFDocument({ size: [W, H], margin: 0, font: FONT });
   doc.pipe(stream);
 
   for (let i = 0; i < mahsulotlar.length; i++) {
