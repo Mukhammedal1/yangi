@@ -137,7 +137,7 @@ async function shtrixRasm(kod) {
     bwipjs.toBuffer({
       bcid: turi,
       text: toza,
-      scale: 4,
+      scale: 2,
       height: 10,
       includetext: false,
       paddingwidth: 0,
