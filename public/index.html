@@ -1,0 +1,795 @@
+<!doctype html>
+<html lang="uz">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Etiketka chop etish</title>
+
+    <style>
+      :root {
+        --qogoz: #ffffff;
+        --fon: #eceae5;
+        --chiziq: #d4d0c8;
+        --matn: #1f1d1a;
+        --sust: #77726a;
+        --yashil: #2f6b3f;
+      }
+
+      * { box-sizing: border-box; }
+
+      body {
+        margin: 0;
+        font: 14px/1.45 "Segoe UI", system-ui, sans-serif;
+        color: var(--matn);
+        background: var(--fon);
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* ===================== HEADER ===================== */
+
+      header {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 10px 16px;
+        background: var(--qogoz);
+        border-bottom: 1px solid var(--chiziq);
+      }
+
+      header h1 { font-size: 15px; font-weight: 600; margin: 0; }
+      header .fayl { color: var(--sust); font-size: 13px; }
+
+      input[type="search"],
+      input[type="number"],
+      select {
+        font: inherit;
+        padding: 6px 9px;
+        border: 1px solid var(--chiziq);
+        border-radius: 3px;
+        background: #fff;
+      }
+
+      input[type="search"] { flex: 1; max-width: 380px; }
+      input[type="search"]:focus { outline: 2px solid var(--yashil); outline-offset: -1px; }
+
+      button {
+        font: inherit;
+        padding: 7px 14px;
+        border: 1px solid var(--chiziq);
+        border-radius: 3px;
+        background: #fff;
+        cursor: pointer;
+      }
+
+      button:hover { background: #f5f3ef; }
+
+      button.asosiy {
+        background: var(--yashil);
+        border-color: var(--yashil);
+        color: #fff;
+        font-weight: 600;
+        padding: 10px 18px;
+      }
+
+      button.asosiy:hover { background: #275a35; }
+      button:disabled { opacity: 0.45; cursor: default; }
+
+      /* ===================== MAIN ===================== */
+
+      main { flex: 1; display: flex; min-height: 0; }
+
+      .royxat { flex: 1; overflow: auto; background: var(--qogoz); }
+
+      .navbat {
+        width: 400px;
+        border-left: 1px solid var(--chiziq);
+        background: var(--qogoz);
+        display: flex;
+        flex-direction: column;
+      }
+
+      .navbat h2 {
+        font-size: 13px;
+        font-weight: 600;
+        margin: 0;
+        padding: 8px 14px;
+        border-bottom: 1px solid var(--chiziq);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+      }
+
+      .navbat .ichi { flex: 1; overflow: auto; min-height: 80px; }
+
+      .boshqaruv {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-weight: 400;
+        font-size: 12px;
+        color: var(--sust);
+      }
+
+      .boshqaruv button { padding: 4px 9px; font-size: 12px; }
+
+      .navbat footer {
+        padding: 12px 14px;
+        border-top: 1px solid var(--chiziq);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      /* ===================== TABLE ===================== */
+
+      table { width: 100%; border-collapse: collapse; }
+
+      th {
+        position: sticky;
+        top: 0;
+        background: #f5f3ef;
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--sust);
+        text-align: left;
+        padding: 7px 12px;
+        border-bottom: 1px solid var(--chiziq);
+        white-space: nowrap;
+      }
+
+      td { padding: 6px 12px; border-bottom: 1px solid #f0eeea; }
+      tbody tr:hover { background: #f7f5f1; cursor: pointer; }
+
+      .bosh { padding: 30px 16px; color: var(--sust); text-align: center; }
+
+      .ochirish { border: 0; background: none; color: var(--sust); padding: 2px 6px; }
+      .ochirish:hover { color: #a33; background: none; }
+
+      .holat { font-size: 13px; color: var(--sust); }
+      .yana { padding: 8px 14px; color: var(--sust); font-size: 12px; }
+
+      /* ===================== SOZLAMALAR ===================== */
+
+      .sozlama {
+        padding: 10px 14px;
+        border-top: 1px solid var(--chiziq);
+        display: flex;
+        flex-direction: column;
+        gap: 7px;
+        max-height: 46vh;
+        overflow: auto;
+      }
+
+      .sozlama h3 {
+        font-size: 12px;
+        font-weight: 600;
+        margin: 2px 0 0;
+        color: var(--sust);
+      }
+
+      .sozlama label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 12px;
+        color: var(--sust);
+        white-space: nowrap;
+      }
+
+      .sozlama b { font-weight: 600; color: var(--matn); min-width: 40px; }
+      .sozlama input[type="range"] { flex: 1; }
+      .sozlama input[type="number"] { width: 56px; padding: 4px 6px; }
+      .sozlama select { flex: 1; min-width: 0; font-size: 12px; padding: 4px 6px; }
+
+      .ustun { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+
+      .ustun .nomi {
+        flex: 1;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        color: var(--matn);
+      }
+
+      .ustun input[type="number"] { width: 48px; padding: 3px 5px; }
+      .ustun.ochiq .nomi { color: var(--sust); }
+
+      /* ===================== ETIKETKA KO'RINISHI ===================== */
+
+      .korinish { display: flex; justify-content: center; padding: 6px 0; }
+
+      .korinish .e {
+        overflow: hidden;
+        font-family: Arial, sans-serif;
+        border: 1px dashed var(--chiziq);
+        background: #fff;
+        color: #000;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .korinish .matn {
+        flex: 1 1 auto;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        overflow: hidden;
+      }
+
+      .korinish .q {
+        text-align: center;
+        line-height: 1.2;
+        color: #000;
+        white-space: normal;
+      }
+
+      .korinish .vl { font-size: 0.55em; }
+
+      .korinish .barcodeBox {
+        flex: 0 0 auto;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .korinish .bar { display: block; object-fit: fill; }
+
+      .korinish .barcodeNumber {
+        width: 100%;
+        text-align: center;
+        font-family: Arial, sans-serif;
+        font-size: 2.5mm;
+        line-height: 1;
+        color: #000;
+        white-space: nowrap;
+        margin: 0;
+        padding: 0;
+      }
+    </style>
+  </head>
+
+  <body>
+    <header>
+      <h1>Etiketka chop etish</h1>
+
+      <span class="fayl" id="faylNomi">fayl tanlanmagan</span>
+
+      <button onclick="fayl.click()">Excel tanlash</button>
+
+      <input type="file" id="fayl" accept=".xlsx,.xlsm,.xls" hidden
+             onchange="yuklash(this.files[0])" />
+
+      <input type="search" id="qidiruv"
+             placeholder="Qidirish — skaner ham ishlaydi" autofocus />
+
+      <button onclick="hammasiniQoshish()" id="hammasiBtn" disabled>
+        Hammasini qo'shish
+      </button>
+    </header>
+
+    <main>
+      <div class="royxat">
+        <div class="bosh" id="bosh">
+          Excel faylni tanlang — hamma ustunlari o'qiladi.
+        </div>
+
+        <table id="jadval" hidden>
+          <thead><tr id="sarlavha"></tr></thead>
+          <tbody id="tana"></tbody>
+        </table>
+      </div>
+
+      <aside class="navbat">
+        <h2>
+          Chop etiladiganlar
+
+          <span class="boshqaruv">
+            har biridan
+            <input type="number" id="umumiySoni" min="1" max="999" value="1"
+                   style="width: 52px" />
+            <button onclick="tozalash()">Tozalash</button>
+          </span>
+        </h2>
+
+        <div class="ichi">
+          <div class="bosh" id="navbatBosh">Ro'yxatdan mahsulot bosing</div>
+          <table id="navbatJadval" hidden><tbody id="navbatTana"></tbody></table>
+          <div class="yana" id="yana" hidden></div>
+        </div>
+
+        <div class="sozlama">
+          <h3>Etiketkada nima chiqsin</h3>
+          <div id="ustunlar"></div>
+
+          <h3>Shtrix kod</h3>
+          <label>
+            <input type="checkbox" id="barKor" checked />
+            <select id="uKod"></select>
+          </label>
+
+          <h3>O'lchamlar</h3>
+          <label>
+            Qog'oz
+            <input type="number" id="en" min="15" max="150" step="1" value="40" />
+            ×
+            <input type="number" id="boyi" min="15" max="150" step="1" value="38" />
+            mm
+          </label>
+
+          <label>
+            Qator oralig'i
+            <b id="oraliqQiymat">1.0 mm</b>
+            <input type="range" id="oraliq" min="0" max="6" step="0.2" value="1" />
+          </label>
+
+          <div class="korinish">
+            <div class="e" id="korinish">
+              <div class="matn"></div>
+              <div class="barcodeBox">
+                <img class="bar" alt="" />
+                <div class="barcodeNumber"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <footer>
+          <button class="asosiy" id="chopBtn" onclick="chopEt()" disabled>
+            Chop etish
+          </button>
+          <button onclick="pdfKor()" id="pdfBtn" disabled>PDF ko'rish</button>
+          <span class="holat" id="holat"></span>
+        </footer>
+      </aside>
+    </main>
+
+    <script>
+      let ustunlar = [];
+      let qatorlar = [];
+      let navbat = [];
+      let mos = [];
+      let sozlash = [];
+
+      /* Barcode blokining o'lchamlari (mm) — server bilan bir xil */
+      const RAQAM_H = 3.5;
+      const BAR_ORALIQ = 1.5;
+      const PAST_CHET = 1.5;
+
+      const el = (id) => document.getElementById(id);
+
+      const belgi = (s) =>
+        String(s == null ? "" : s)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;");
+
+      /* 22000 -> 22 000 */
+      function matnQil(qiymat) {
+        const s = String(qiymat == null ? "" : qiymat).trim();
+        if (s === "") return "";
+
+        const son = Number(s.replace(/\s/g, "").replace(",", "."));
+
+        if (isFinite(son) && s.length < 12 && /^[\d\s.,]+$/.test(s)) {
+          return son.toLocaleString("ru-RU").replace(/,/g, " ");
+        }
+        return s;
+      }
+
+      const narxMi = (nom) => /narx|цена|price|sotuv/i.test(nom);
+
+      /* ===================== O'LCHAMLAR ===================== */
+
+      function olchamlar() {
+        return {
+          en: Math.max(15, +el("en").value || 40),
+          boyi: Math.max(15, +el("boyi").value || 38),
+          oraliq: +el("oraliq").value,
+          bar: el("barKor").checked && +el("uKod").value >= 0,
+        };
+      }
+
+      /* Preview va server bitta hisobdan foydalanadi */
+      function geometriya(o) {
+        const chet = Math.min(2, o.boyi * 0.06);
+        const barH = o.bar ? Math.max(5, o.boyi * 0.28) : 0;
+        const blokH = o.bar ? barH + BAR_ORALIQ + RAQAM_H + PAST_CHET : 0;
+        return { chet, barH, blokH, matnH: Math.max(1, o.boyi - 2 * chet - blokH) };
+      }
+
+      /* ===================== ETIKETKA MA'LUMOTI ===================== */
+
+      function etiketka(qator) {
+        const iKod = +el("uKod").value;
+
+        return {
+          qatorlar: sozlash
+            .map((s, i) =>
+              s.chiq
+                ? {
+                    matn: matnQil(qator[i]),
+                    olcham: s.olcham,
+                    qalin: s.qalin,
+                    qoshimcha: s.valyuta ? "so'm" : "",
+                  }
+                : null
+            )
+            .filter((q) => q && q.matn !== ""),
+
+          kod: iKod >= 0 ? qator[iKod] : "",
+        };
+      }
+
+      /* ===================== EXCEL YUKLASH ===================== */
+
+      async function yuklash(f) {
+        if (!f) return;
+
+        const fd = new FormData();
+        fd.append("fayl", f);
+
+        const r = await fetch("/api/excel", { method: "POST", body: fd });
+        const d = await r.json();
+
+        if (d.xato) return alert("Faylni o'qib bo'lmadi: " + d.xato);
+
+        ustunlar = d.ustunlar;
+        qatorlar = d.qatorlar;
+        navbat = [];
+
+        sozlash = ustunlar.map((u, i) => ({
+          chiq: i === d.taxmin.nom || i === d.taxmin.narx,
+          olcham: i === d.taxmin.narx ? 14 : 9,
+          qalin: true,
+          valyuta: narxMi(u),
+        }));
+
+        ustunSozlamasi();
+        kodRoyxati(d.taxmin.kod);
+
+        el("faylNomi").textContent = f.name + " — " + qatorlar.length + " ta";
+
+        chizish();
+        navbatChizish();
+        el("qidiruv").focus();
+      }
+
+      /* ===================== USTUN SOZLAMALARI ===================== */
+
+      function ustunSozlamasi() {
+        el("ustunlar").innerHTML = "";
+
+        ustunlar.forEach((u, i) => {
+          const s = sozlash[i];
+          const div = document.createElement("div");
+
+          div.className = "ustun" + (s.chiq ? "" : " ochiq");
+
+          div.innerHTML = `
+            <input type="checkbox" ${s.chiq ? "checked" : ""}>
+            <span class="nomi">${belgi(u)}</span>
+            <input type="number" min="4" max="40" step="0.5" value="${s.olcham}">
+            <span>pt</span>
+          `;
+
+          const [quti, , olcham] = div.children;
+
+          quti.onchange = () => {
+            s.chiq = quti.checked;
+            div.className = "ustun" + (s.chiq ? "" : " ochiq");
+            korinishChizish();
+          };
+
+          olcham.onchange = olcham.oninput = () => {
+            s.olcham = Math.max(4, +olcham.value || 9);
+            korinishChizish();
+          };
+
+          el("ustunlar").appendChild(div);
+        });
+      }
+
+      /* ===================== BARCODE USTUNI ===================== */
+
+      function kodRoyxati(tanlangan) {
+        const sel = el("uKod");
+
+        sel.innerHTML =
+          `<option value="-1">— yo'q —</option>` +
+          ustunlar
+            .map((u, i) => `<option value="${i}">${belgi(u)}</option>`)
+            .join("");
+
+        sel.value = String(tanlangan >= 0 ? tanlangan : -1);
+        sel.onchange = korinishChizish;
+      }
+
+      /* ===================== RO'YXAT ===================== */
+
+      function chizish() {
+        const q = el("qidiruv").value.toLowerCase().trim();
+
+        mos = qatorlar.filter(
+          (r) => !q || r.some((v) => String(v).toLowerCase().includes(q))
+        );
+
+        el("hammasiBtn").disabled = mos.length === 0;
+
+        el("hammasiBtn").textContent = q
+          ? `Topilgan ${mos.length} tasini qo'shish`
+          : `Hammasini qo'shish (${mos.length})`;
+
+        el("bosh").hidden = mos.length > 0;
+        el("jadval").hidden = mos.length === 0;
+
+        if (!mos.length && qatorlar.length) {
+          el("bosh").textContent = "Topilmadi";
+        }
+
+        el("sarlavha").innerHTML = ustunlar
+          .map((u) => `<th>${belgi(u)}</th>`)
+          .join("");
+
+        el("tana").innerHTML = "";
+
+        for (const r of mos.slice(0, 500)) {
+          const tr = document.createElement("tr");
+          tr.innerHTML = ustunlar.map(() => "<td></td>").join("");
+
+          ustunlar.forEach((_, i) => {
+            tr.children[i].textContent = r[i];
+          });
+
+          tr.onclick = () => qoshish(r);
+          el("tana").appendChild(tr);
+        }
+
+        korinishChizish();
+      }
+
+      /* ===================== NAVBAT ===================== */
+
+      function qoshish(r) {
+        const bor = navbat.find((n) => n.qator === r);
+        if (bor) bor.soni++;
+        else navbat.push({ qator: r, soni: 1 });
+        navbatChizish();
+      }
+
+      function hammasiniQoshish() {
+        const n = Math.max(1, +el("umumiySoni").value || 1);
+
+        for (const r of mos) {
+          const bor = navbat.find((x) => x.qator === r);
+          if (bor) bor.soni = n;
+          else navbat.push({ qator: r, soni: n });
+        }
+
+        navbatChizish();
+      }
+
+      function tozalash() {
+        navbat = [];
+        navbatChizish();
+      }
+
+      function navbatChizish() {
+        el("navbatBosh").hidden = navbat.length > 0;
+        el("navbatJadval").hidden = navbat.length === 0;
+        el("chopBtn").disabled = el("pdfBtn").disabled = navbat.length === 0;
+
+        el("navbatTana").innerHTML = "";
+
+        const chegara = 200;
+
+        el("yana").hidden = navbat.length <= chegara;
+        el("yana").textContent =
+          `…va yana ${navbat.length - chegara} ta (hammasi chop etiladi)`;
+
+        navbat.slice(0, chegara).forEach((n, i) => {
+          const tr = document.createElement("tr");
+
+          tr.innerHTML = `
+            <td></td>
+            <td style="width:70px">
+              <input type="number" min="1" max="999" style="width:60px">
+            </td>
+            <td style="width:32px"><button class="ochirish">✕</button></td>
+          `;
+
+          tr.children[0].textContent = n.qator.find((v) => v !== "") || "—";
+
+          const inp = tr.querySelector("input");
+          inp.value = n.soni;
+
+          inp.onchange = () => {
+            n.soni = Math.max(1, +inp.value || 1);
+            jami();
+          };
+
+          tr.querySelector("button").onclick = () => {
+            navbat.splice(i, 1);
+            navbatChizish();
+          };
+
+          el("navbatTana").appendChild(tr);
+        });
+
+        jami();
+        korinishChizish();
+      }
+
+      function jami() {
+        const j = navbat.reduce((s, n) => s + n.soni, 0);
+        el("holat").textContent = j ? j + " ta etiketka" : "";
+        return j;
+      }
+
+      const royxat = () =>
+        navbat.flatMap((n) => Array(n.soni).fill(n.qator)).map(etiketka);
+
+      /* ===================== PREVIEW ===================== */
+
+      function korinishChizish() {
+        const o = olchamlar();
+        const g = geometriya(o);
+
+        el("oraliqQiymat").textContent = o.oraliq.toFixed(1) + " mm";
+
+        const e = el("korinish");
+        e.style.width = o.en + "mm";
+        e.style.height = o.boyi + "mm";
+
+        const matn = e.querySelector(".matn");
+        matn.style.cssText = `
+          padding:${g.chet}mm ${g.chet}mm 0;
+          gap:${o.oraliq}mm;
+        `;
+
+        const barcodeBox = e.querySelector(".barcodeBox");
+        barcodeBox.style.cssText = `
+          padding-bottom:${PAST_CHET}mm;
+          gap:${BAR_ORALIQ}mm;
+        `;
+
+        const bar = e.querySelector(".bar");
+        const barcodeNumber = e.querySelector(".barcodeNumber");
+
+        const qator = (navbat[0] && navbat[0].qator) || mos[0];
+
+        if (!qator) {
+          matn.innerHTML = "";
+          bar.style.display = "none";
+          barcodeNumber.textContent = "";
+          barcodeBox.style.display = "none";
+          return;
+        }
+
+        barcodeBox.style.display = "flex";
+
+        const d = etiketka(qator);
+
+        matn.innerHTML = d.qatorlar
+          .map(
+            (q) => `
+              <div class="q" style="
+                font-size:${q.olcham}pt;
+                font-weight:${q.qalin ? "bold" : "normal"}
+              ">
+                ${belgi(q.matn)}
+                ${q.qoshimcha ? `<span class="vl">${q.qoshimcha}</span>` : ""}
+              </div>
+            `
+          )
+          .join("");
+
+        sigdirish(matn);
+
+        if (o.bar && d.kod) {
+          bar.style.cssText = `
+            display:block;
+            width:${o.en - 2 * g.chet}mm;
+            height:${g.barH}mm;
+            object-fit:fill;
+          `;
+          bar.src = "/api/shtrix?kod=" + encodeURIComponent(d.kod);
+          barcodeNumber.textContent = d.kod;
+        } else {
+          bar.style.display = "none";
+          barcodeNumber.textContent = "";
+          barcodeBox.style.display = "none";
+        }
+      }
+
+      function sigdirish(blok) {
+        const satrlar = Array.from(blok.querySelectorAll(".q"));
+        const asl = satrlar.map((s) => parseFloat(s.style.fontSize));
+
+        for (let k = 1; k >= 0.4; k -= 0.05) {
+          satrlar.forEach((s, i) => {
+            s.style.fontSize = Math.max(4, asl[i] * k) + "pt";
+          });
+
+          if (blok.scrollHeight <= blok.clientHeight) return;
+        }
+      }
+
+      /* ===================== CHOP ETISH =====================
+         PDF serverda pointda yasaladi — zoom, DPI, Windows
+         masshtabi ta'sir qilmaydi, har kompyuterda bir xil.
+      ====================================================== */
+
+      async function pdfOlish() {
+        const r = await fetch("/api/pdf", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ mahsulotlar: royxat(), sozlama: olchamlar() }),
+        });
+
+        if (!r.ok) {
+          const d = await r.json().catch(() => ({}));
+          throw new Error(d.xato || "server xatosi (" + r.status + ")");
+        }
+
+        return URL.createObjectURL(await r.blob());
+      }
+
+      async function chopEt() {
+        const soni = royxat().length;
+        if (!soni) return;
+
+        el("chopBtn").disabled = true;
+        el("holat").textContent = "tayyorlanmoqda…";
+
+        try {
+          const w = window.open(await pdfOlish());
+          if (w) w.onload = () => w.print();
+          el("holat").textContent = soni + " ta etiketka tayyor";
+        } catch (e) {
+          el("holat").textContent = "";
+          alert("Chop etib bo'lmadi: " + e.message);
+        }
+
+        el("chopBtn").disabled = navbat.length === 0;
+      }
+
+      async function pdfKor() {
+        try {
+          window.open(await pdfOlish());
+        } catch (e) {
+          alert("PDF yasab bo'lmadi: " + e.message);
+        }
+      }
+
+      /* ===================== EVENTLAR ===================== */
+
+      ["en", "boyi", "oraliq", "barKor"].forEach((id) => {
+        el(id).oninput = el(id).onchange = korinishChizish;
+      });
+
+      el("qidiruv").oninput = chizish;
+
+      el("qidiruv").onkeydown = (e) => {
+        if (e.key !== "Enter") return;
+
+        const q = el("qidiruv").value.toLowerCase().trim();
+
+        const topildi = qatorlar.filter((r) =>
+          r.some((v) => String(v).toLowerCase().includes(q))
+        );
+
+        if (topildi.length === 1) {
+          qoshish(topildi[0]);
+          el("qidiruv").value = "";
+          chizish();
+        }
+      };
+    </script>
+  </body>
+</html>
