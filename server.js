@@ -26,7 +26,15 @@ const BAR_ORALIQ = 1.5; // barcode bilan raqam orasi, mm
 const PAST_CHET = 1.5; // blokdan pastdagi bo'sh joy, mm
 
 // Excel sarlavhalarida qidiriladigan so'zlar (faqat taxmin uchun)
-const NOM_KEYS = ["nomi", "tovar", "mahsulot", "наименование", "название", "товар", "name"];
+const NOM_KEYS = [
+  "nomi",
+  "tovar",
+  "mahsulot",
+  "наименование",
+  "название",
+  "товар",
+  "name",
+];
 const NARX_KEYS = ["sotuv", "narx", "розничная", "цена", "price"];
 const KOD_KEYS = ["shtrix", "штрих", "barcode", "kod", "код"];
 
@@ -76,12 +84,14 @@ function excelOqish(buffer) {
   }
 
   const sarlavha = hammasi[bosh] || [];
-  const ustunlar = sarlavha.map((u, i) => String(u || "").trim() || `Ustun ${i + 1}`);
+  const ustunlar = sarlavha.map(
+    (u, i) => String(u || "").trim() || `Ustun ${i + 1}`,
+  );
 
   const qatorlar = [];
   for (const q of hammasi.slice(bosh + 1)) {
     const qator = ustunlar.map((_, i) =>
-      q[i] === undefined || q[i] === null ? "" : String(q[i]).trim()
+      q[i] === undefined || q[i] === null ? "" : String(q[i]).trim(),
     );
     if (qator.some((x) => x !== "")) qatorlar.push(qator);
   }
@@ -182,7 +192,8 @@ function satrChizish(doc, matn, qoshimcha, x, y, kenglik, olcham, qalin) {
 async function pdfYasash(mahsulotlar, stream, sozlama = {}) {
   const enMM = Number(sozlama.en) || EN;
   const boyiMM = Number(sozlama.boyi) || BOYI;
-  const oraliq = (sozlama.oraliq == null ? ORALIQ : Number(sozlama.oraliq)) * MM;
+  const oraliq =
+    (sozlama.oraliq == null ? ORALIQ : Number(sozlama.oraliq)) * MM;
 
   const W = enMM * MM;
   const H = boyiMM * MM;
@@ -198,36 +209,73 @@ async function pdfYasash(mahsulotlar, stream, sozlama = {}) {
   const matnH = Math.max(0, H - 2 * chet - blokH);
 
   const doc = new PDFDocument({ size: [W, H], margin: 0, font: FONT });
+  // Bir xil kod ko'p marta uchraydi (har biridan 40 dona kabi).
+  // Uni qaytadan chizish sekin, PDF ham shishib ketadi.
+  const rasmKesh = new Map();
+  const matnKesh = new Map();
+
+  async function rasmOlish(kod) {
+    const kalit = String(kod || "");
+    if (rasmKesh.has(kalit)) return rasmKesh.get(kalit);
+
+    const bufer = await shtrixRasm(kalit);
+    const rasm = bufer ? doc.openImage(bufer) : null;
+    rasmKesh.set(kalit, rasm);
+    return rasm;
+  }
   doc.pipe(stream);
 
   for (let i = 0; i < mahsulotlar.length; i++) {
     if (i > 0) doc.addPage({ size: [W, H], margin: 0 });
 
     const m = mahsulotlar[i] || {};
-    const kiruvchi = (m.qatorlar || []).filter((q) => String(q.matn).trim() !== "");
+    const kiruvchi = (m.qatorlar || []).filter(
+      (q) => String(q.matn).trim() !== "",
+    );
 
     // hamma satr sig'maguncha shriftlarni birdek kichraytiramiz
-    let tayyor = [];
-    let balandlik = 0;
-    for (let k = 1; k >= 0.4; k -= 0.05) {
-      tayyor = [];
-      balandlik = 0;
-      for (const q of kiruvchi) {
-        const olcham = Math.max(4, q.olcham * k);
-        const satrlar = satrlarga(doc, q.matn, ich, olcham, q.qalin);
-        tayyor.push({ satrlar, olcham, qoshimcha: q.qoshimcha, qalin: q.qalin });
-        balandlik += satrlar.length * olcham * 1.2;
+    const kalit = JSON.stringify(kiruvchi);
+    let hisob = matnKesh.get(kalit);
+    if (!hisob) {
+      let tayyor = [];
+      let balandlik = 0;
+      for (let k = 1; k >= 0.4; k -= 0.05) {
+        tayyor = [];
+        balandlik = 0;
+        for (const q of kiruvchi) {
+          const olcham = Math.max(4, q.olcham * k);
+          const satrlar = satrlarga(doc, q.matn, ich, olcham, q.qalin);
+          tayyor.push({
+            satrlar,
+            olcham,
+            qoshimcha: q.qoshimcha,
+            qalin: q.qalin,
+          });
+          balandlik += satrlar.length * olcham * 1.2;
+        }
+        balandlik += Math.max(0, tayyor.length - 1) * oraliq;
+        if (balandlik <= matnH) break;
       }
-      balandlik += Math.max(0, tayyor.length - 1) * oraliq;
-      if (balandlik <= matnH) break;
+      hisob = { tayyor, balandlik };
+      matnKesh.set(kalit, hisob);
     }
+    const { tayyor, balandlik } = hisob;
 
     // matn blokini matn joyi ichida vertikal o'rtaga qo'yamiz
     let y = chet + Math.max(0, (matnH - balandlik) / 2);
     for (const q of tayyor) {
       q.satrlar.forEach((satr, n) => {
         const oxirgi = n === q.satrlar.length - 1;
-        satrChizish(doc, satr, oxirgi ? q.qoshimcha : "", chet, y, ich, q.olcham, q.qalin);
+        satrChizish(
+          doc,
+          satr,
+          oxirgi ? q.qoshimcha : "",
+          chet,
+          y,
+          ich,
+          q.olcham,
+          q.qalin,
+        );
         y += q.olcham * 1.2;
       });
       y += oraliq;
@@ -235,7 +283,7 @@ async function pdfYasash(mahsulotlar, stream, sozlama = {}) {
 
     // barcode + tagidagi raqam
     if (barKor) {
-      const rasm = await shtrixRasm(m.kod);
+      const rasm = await rasmOlish(m.kod);
       if (rasm) {
         const raqamY = H - PAST_CHET * MM - RAQAM_H * MM;
         const barY = raqamY - BAR_ORALIQ * MM - barH;
