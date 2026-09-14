@@ -150,6 +150,19 @@
       .ochirish:hover { color: #a33; background: none; }
 
       .holat { font-size: 13px; color: var(--sust); }
+
+      .diapazon {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 12px;
+        color: var(--sust);
+        white-space: nowrap;
+      }
+
+      .diapazon input { width: 62px; padding: 5px 7px; }
+
+      .tartib { width: 48px; color: var(--sust); }
       .yana { padding: 8px 14px; color: var(--sust); font-size: 12px; }
 
       /* ===================== SOZLAMALAR ===================== */
@@ -267,6 +280,12 @@
 
       <input type="search" id="qidiruv"
              placeholder="Qidirish — skaner ham ishlaydi" autofocus />
+
+      <label class="diapazon">
+        <input type="number" id="dan" min="1" placeholder="1" />
+        –
+        <input type="number" id="gacha" min="1" placeholder="oxiri" />
+      </label>
 
       <button onclick="hammasiniQoshish()" id="hammasiBtn" disabled>
         Hammasini qo'shish
@@ -519,11 +538,7 @@
           (r) => !q || r.some((v) => String(v).toLowerCase().includes(q))
         );
 
-        el("hammasiBtn").disabled = mos.length === 0;
-
-        el("hammasiBtn").textContent = q
-          ? `Topilgan ${mos.length} tasini qo'shish`
-          : `Hammasini qo'shish (${mos.length})`;
+        tugmaYangilash();
 
         el("bosh").hidden = mos.length > 0;
         el("jadval").hidden = mos.length === 0;
@@ -532,23 +547,28 @@
           el("bosh").textContent = "Topilmadi";
         }
 
-        el("sarlavha").innerHTML = ustunlar
-          .map((u) => `<th>${belgi(u)}</th>`)
-          .join("");
+        el("sarlavha").innerHTML =
+          `<th class="tartib">#</th>` +
+          ustunlar.map((u) => `<th>${belgi(u)}</th>`).join("");
 
         el("tana").innerHTML = "";
 
-        for (const r of mos.slice(0, 500)) {
+        mos.slice(0, 500).forEach((r, idx) => {
           const tr = document.createElement("tr");
-          tr.innerHTML = ustunlar.map(() => "<td></td>").join("");
+
+          tr.innerHTML =
+            `<td class="tartib"></td>` +
+            ustunlar.map(() => "<td></td>").join("");
+
+          tr.children[0].textContent = idx + 1;
 
           ustunlar.forEach((_, i) => {
-            tr.children[i].textContent = r[i];
+            tr.children[i + 1].textContent = r[i];
           });
 
           tr.onclick = () => qoshish(r);
           el("tana").appendChild(tr);
-        }
+        });
 
         korinishChizish();
       }
@@ -562,10 +582,36 @@
         navbatChizish();
       }
 
+      /* Ro'yxatdagi nechinchidan nechinchigacha.
+         Ikkalasi ham bo'sh bo'lsa - butun ro'yxat. */
+      function tanlangan() {
+        const n = mos.length;
+
+        let a = parseInt(el("dan").value, 10);
+        let b = parseInt(el("gacha").value, 10);
+
+        if (!(a >= 1)) a = 1;
+        if (!(b >= 1)) b = n;
+        if (a > b) [a, b] = [b, a];
+
+        return mos.slice(a - 1, Math.min(b, n));
+      }
+
+      function tugmaYangilash() {
+        const t = tanlangan();
+
+        el("hammasiBtn").disabled = t.length === 0;
+
+        el("hammasiBtn").textContent =
+          t.length === mos.length
+            ? `Hammasini qo'shish (${mos.length})`
+            : `${t.length} tasini qo'shish`;
+      }
+
       function hammasiniQoshish() {
         const n = Math.max(1, +el("umumiySoni").value || 1);
 
-        for (const r of mos) {
+        for (const r of tanlangan()) {
           const bor = navbat.find((x) => x.qator === r);
           if (bor) bor.soni = n;
           else navbat.push({ qator: r, soni: n });
@@ -772,6 +818,8 @@
       ["en", "boyi", "oraliq", "barKor"].forEach((id) => {
         el(id).oninput = el(id).onchange = korinishChizish;
       });
+
+      el("dan").oninput = el("gacha").oninput = tugmaYangilash;
 
       el("qidiruv").oninput = chizish;
 
