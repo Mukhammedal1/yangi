@@ -42,28 +42,10 @@ const KOD_KEYS = ["shtrix", "штрих", "barcode", "kod", "код"];
 //
 // vercel.json dagi includeFiles ham fonts/** ni o'z ichiga olishi shart.
 
-const FONT_DIR = path.join(__dirname, "public", "fonts");
-
-const topFont = (yollar, zahira) =>
-  yollar.filter(Boolean).find(fs.existsSync) || zahira;
-
-const FONT = topFont(
-  [
-    path.join(FONT_DIR, "DejaVuSans.ttf"),
-    "C:\\Windows\\Fonts\\arial.ttf",
-    "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
-  ],
-  "Helvetica"
-);
-
-const FONT_B = topFont(
-  [
-    path.join(FONT_DIR, "DejaVuSans-Bold.ttf"),
-    "C:\\Windows\\Fonts\\arialbd.ttf",
-    "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
-  ],
-  "Helvetica-Bold"
-);
+// Font base64 holida JS modul ichida. require() bo'lgani uchun
+// Vercel bundler uni har doim ko'radi — fs ham, includeFiles ham kerak emas.
+const FONT = require("./fonts/sans.js");
+const FONT_B = require("./fonts/sans-bold.js");
 
 // ------------------------------------------------------------------ EXCEL
 
