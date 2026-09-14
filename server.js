@@ -42,7 +42,7 @@ const KOD_KEYS = ["shtrix", "штрих", "barcode", "kod", "код"];
 //
 // vercel.json dagi includeFiles ham fonts/** ni o'z ichiga olishi shart.
 
-const FONT_DIR = path.join(__dirname, "fonts");
+const FONT_DIR = path.join(__dirname, "public", "fonts");
 
 const topFont = (yollar, zahira) =>
   yollar.filter(Boolean).find(fs.existsSync) || zahira;
